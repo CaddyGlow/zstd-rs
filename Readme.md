@@ -1,5 +1,8 @@
 ## CaddyGlow fork
 
+Published on crates.io as `ms-compress-ruzstd` 0.9.1. Import it as
+`ms_compress_ruzstd`, or use a dependency alias to retain `ruzstd` imports.
+
 This fork ports the safe storage, dependency-free XXH64, and retained-output
 changes from `ms-compress` onto upstream ruzstd 0.9.1. The upstream MIT license
 and attribution are unchanged.
@@ -24,8 +27,8 @@ performance parity with the upstream unsafe ring buffer has not been measured.
 
 # Ruzstd (a pure rust zstd format implementation)
 
-[![Released API docs](https://docs.rs/ruzstd/badge.svg)](https://docs.rs/ruzstd)
-[![CI](https://github.com/killingspark/zstd-rs/workflows/CI/badge.svg)](https://github.com/killingspark/zstd-rs/actions?query=workflow%3ACI)
+[![Released API docs](https://docs.rs/ms-compress-ruzstd/badge.svg)](https://docs.rs/ms-compress-ruzstd)
+[![CI](https://github.com/CaddyGlow/zstd-rs/workflows/CI/badge.svg)](https://github.com/CaddyGlow/zstd-rs/actions?query=workflow%3ACI)
 
 
 # What is this
@@ -91,7 +94,7 @@ for clarification.
 The easiest is to use the provided `compress`/`compress_to_vec` functions
 
 ```rust, no_run
-use ruzstd::encoding::{compress, compress_to_vec, CompressionLevel};
+use ms_compress_ruzstd::encoding::{compress, compress_to_vec, CompressionLevel};
 let data: &[u8] = todo!();
 // Either
 let mut compressed = Vec::new();
@@ -111,8 +114,8 @@ Additionally to the descriptions and the docs you can have a look at the zstd / 
 The easiest is to wrap the io::Read into a StreamingDecoder which itself implements io::Read. It will decode blocks as necessary to fulfill the read requests
 
 ```rust, no_run
-use ruzstd::decoding::StreamingDecoder;
-use ruzstd::io::Read;
+use ms_compress_ruzstd::decoding::StreamingDecoder;
+use ms_compress_ruzstd::io::Read;
 
 let mut source: &[u8] = todo!("Get a reader from a File or any other source");
 let mut decoder = StreamingDecoder::new(&mut source).unwrap();

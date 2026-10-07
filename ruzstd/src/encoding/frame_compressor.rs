@@ -24,7 +24,7 @@ use crate::io::{Read, Write};
 ///
 /// # Examples
 /// ```
-/// use ruzstd::encoding::{FrameCompressor, CompressionLevel};
+/// use ms_compress_ruzstd::encoding::{FrameCompressor, CompressionLevel};
 /// let mock_data: &[_] = &[0x1, 0x2, 0x3, 0x4];
 /// let mut output = std::vec::Vec::new();
 /// // Initialize a compressor.

@@ -4,6 +4,8 @@ This document records the changes made between versions, starting with version 0
 
 # After 0.9.0 (Current)
 
+* Publish the CaddyGlow fork separately as ms-compress-ruzstd 0.9.1.
+
 * CaddyGlow fork: replace unsafe decoder ring storage with checked VecDeque storage.
 * Use internal dependency-free XXH64; decoder checksum calculation is always enabled.
 * Add retained-output copying with bounded match history and once-per-emitted-byte hashing.

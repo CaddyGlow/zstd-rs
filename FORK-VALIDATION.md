@@ -10,11 +10,11 @@ Validated locally on Linux:
 
 ```sh
 cargo fmt --all -- --check
-cargo test --workspace --features ruzstd/dict_builder,ruzstd/fuzz_exports --locked
-cargo test -p ruzstd --no-default-features --locked
-cargo clippy --workspace --all-targets --features ruzstd/dict_builder,ruzstd/fuzz_exports --locked -- -D warnings
-cargo clippy -p ruzstd --all-targets --no-default-features --locked -- -D warnings
-cargo check -p ruzstd --lib --no-default-features --target thumbv7em-none-eabi --locked
+cargo test --workspace --features ms-compress-ruzstd/dict_builder,ms-compress-ruzstd/fuzz_exports --locked
+cargo test -p ms-compress-ruzstd --no-default-features --locked
+cargo clippy --workspace --all-targets --features ms-compress-ruzstd/dict_builder,ms-compress-ruzstd/fuzz_exports --locked -- -D warnings
+cargo clippy -p ms-compress-ruzstd --all-targets --no-default-features --locked -- -D warnings
+cargo check -p ms-compress-ruzstd --lib --no-default-features --target thumbv7em-none-eabi --locked
 ```
 
 The feature-enabled run passed 79 library tests, 4 retained-output integration
@@ -28,3 +28,11 @@ CI; it is intended for integration into libstd. The local generated Cargo.lock
 is ignored under upstream's existing policy. Generate it before using --locked
 in a fresh checkout. Continuous fuzzing, native Windows checks, and performance
 benchmarks were not run.
+
+## crates.io preparation
+
+The fork package is named `ms-compress-ruzstd` 0.9.1. Its repository metadata
+points to CaddyGlow/zstd-rs; the upstream author and MIT license remain.
+Workspace tests, doctests, strict Clippy, and embedded compilation passed after
+renaming. `cargo publish -p ms-compress-ruzstd --dry-run --allow-dirty --locked`
+verified the packaged crate successfully before release.

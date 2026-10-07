@@ -1,5 +1,5 @@
-use ruzstd::decoding::{BlockDecodingStrategy, Dictionary, FrameDecoder};
-use ruzstd::io::Read;
+use ms_compress_ruzstd::decoding::{BlockDecodingStrategy, Dictionary, FrameDecoder};
+use ms_compress_ruzstd::io::Read;
 fn payload() -> Vec<u8> {
     let pattern: Vec<_> = (0..8192)
         .map(|i| ((i * 37 + i / 251) % 256) as u8)

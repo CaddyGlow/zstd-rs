@@ -1,13 +1,13 @@
 [package]
-name = "ruzstd"
+name = "ms-compress-ruzstd"
 version = "0.9.1"
 rust-version = "1.87"
 authors = ["Moritz Borcherding <moritz.borcherding@web.de>"]
 edition = "2018"
 license = "MIT"
-homepage = "https://github.com/KillingSpark/zstd-rs"
-repository = "https://github.com/KillingSpark/zstd-rs"
-description = "A decoder for the zstd compression format"
+homepage = "https://github.com/CaddyGlow/zstd-rs"
+repository = "https://github.com/CaddyGlow/zstd-rs"
+description = "Patched ruzstd with safe decoder storage, internal XXH64, and retained-output decoding"
 exclude = ["decodecorpus_files/*", "dict_tests/*", "fuzz_decodecorpus/*"]
 readme = "Readme.md"
 keywords = ["zstd", "zstandard", "decompression"]
