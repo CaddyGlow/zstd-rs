@@ -259,7 +259,6 @@ impl FrameDecoder {
 
     /// Returns the checksum that was calculated while decoding.
     /// Only a sensible value after all decoded bytes have been collected/read from the FrameDecoder
-    #[cfg(feature = "hash")]
     pub fn get_calculated_checksum(&self) -> Option<u32> {
         use core::hash::Hasher;
 
@@ -403,6 +402,26 @@ impl FrameDecoder {
         }
     }
 
+    /// Copy available output while retaining the frame's match window.
+    /// Initialize the cursor to zero per frame, then pass the same cursor unchanged
+    /// between calls; this method advances it. Do not mix with destructive
+    /// Read/collect/write APIs within a frame.
+    /// Checksums include each emitted byte once, including retained history.
+    pub fn copy_output_retaining_history(
+        &mut self,
+        target: &mut [u8],
+        emitted: &mut usize,
+    ) -> usize {
+        self.state.as_mut().map_or(0, |state| {
+            state.decoder_scratch.buffer.copy_retained(target, emitted)
+        })
+    }
+    /// Number of decoded bytes not yet emitted through retained-output mode.
+    pub fn remaining_output_retaining_history(&self, emitted: usize) -> usize {
+        self.state.as_ref().map_or(0, |state| {
+            state.decoder_scratch.buffer.remaining_retained(emitted)
+        })
+    }
     /// How many bytes can currently be collected from the decodebuffer, while decoding is going on this will be lower than the actual decodbuffer size
     /// because window_size bytes need to be retained for decoding.
     /// After decoding of the frame (is_finished() == true) has finished it will report all remaining bytes

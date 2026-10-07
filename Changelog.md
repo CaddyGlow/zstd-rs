@@ -4,6 +4,11 @@ This document records the changes made between versions, starting with version 0
 
 # After 0.9.0 (Current)
 
+* CaddyGlow fork: replace unsafe decoder ring storage with checked VecDeque storage.
+* Use internal dependency-free XXH64; decoder checksum calculation is always enabled.
+* Add retained-output copying with bounded match history and once-per-emitted-byte hashing.
+* Add libzstd fixtures and streaming XXH64 reference comparisons.
+
 # After 0.8.3
 
 * Avoid emitting compressed blocks when the compressed payload is not smaller

@@ -1,6 +1,5 @@
 use crate::io::{Error, Read, Write};
 use alloc::vec::Vec;
-#[cfg(feature = "hash")]
 use core::hash::Hasher;
 
 use super::ringbuffer::RingBuffer;
@@ -12,8 +11,9 @@ pub struct DecodeBuffer {
 
     pub window_size: usize,
     total_output_counter: u64,
-    #[cfg(feature = "hash")]
-    pub hash: twox_hash::XxHash64,
+    retained_start: usize,
+
+    pub hash: crate::checksum::XxHash64,
 }
 
 impl Read for DecodeBuffer {
@@ -38,8 +38,9 @@ impl DecodeBuffer {
             dict_content: Vec::new(),
             window_size,
             total_output_counter: 0,
-            #[cfg(feature = "hash")]
-            hash: twox_hash::XxHash64::with_seed(0),
+            retained_start: 0,
+
+            hash: crate::checksum::XxHash64::with_seed(0),
         }
     }
 
@@ -49,10 +50,42 @@ impl DecodeBuffer {
         self.buffer.reserve(self.window_size);
         self.dict_content.clear();
         self.total_output_counter = 0;
-        #[cfg(feature = "hash")]
-        {
-            self.hash = twox_hash::XxHash64::with_seed(0);
+        self.retained_start = 0;
+
+        self.hash = crate::checksum::XxHash64::with_seed(0);
+    }
+
+    /// Emit new output without discarding bytes that subsequent matches need.
+    pub fn copy_retained(&mut self, target: &mut [u8], emitted: &mut usize) -> usize {
+        if *emitted < self.retained_start {
+            return 0;
         }
+        let offset = *emitted - self.retained_start;
+        let (first, second) = self.buffer.as_slices();
+        let available = (first.len() + second.len()).saturating_sub(offset);
+        let count = available.min(target.len());
+        if count == 0 {
+            return 0;
+        }
+        let mut copied = 0;
+        if offset < first.len() {
+            let n = count.min(first.len() - offset);
+            target[..n].copy_from_slice(&first[offset..offset + n]);
+            copied = n;
+        }
+        if copied < count {
+            let offset = offset.saturating_sub(first.len());
+            target[copied..count].copy_from_slice(&second[offset..offset + count - copied]);
+        }
+        self.hash.write(&target[..count]);
+        *emitted += count;
+        let evict = (*emitted - self.retained_start).saturating_sub(self.window_size);
+        self.buffer.drop_first_n(evict);
+        self.retained_start += evict;
+        count
+    }
+    pub fn remaining_retained(&self, emitted: usize) -> usize {
+        (self.retained_start + self.buffer.len()).saturating_sub(emitted)
     }
 
     pub fn len(&self) -> usize {
@@ -99,10 +132,7 @@ impl DecodeBuffer {
                 //      Thus follows: start_idx + match_length <= self.buffer.len()
                 //
                 // 2. explicitly reserved enough memory for the whole match_length
-                unsafe {
-                    self.buffer
-                        .extend_from_within_unchecked(start_idx, match_length)
-                };
+                self.buffer.extend_from_within(start_idx, match_length);
             }
 
             self.total_output_counter += match_length as u64;
@@ -131,10 +161,7 @@ impl DecodeBuffer {
             //          Meaning: start_idx + chunksize <= self.buffer.len()
             //
             // 2. explicitly reserved enough memory for the whole match_length
-            unsafe {
-                self.buffer
-                    .extend_from_within_unchecked(start_idx, chunksize)
-            };
+            self.buffer.extend_from_within(start_idx, chunksize);
             copied_counter_left -= chunksize;
             start_idx += chunksize;
         }
@@ -220,7 +247,7 @@ impl DecodeBuffer {
     /// drain the buffer completely
     pub fn drain(&mut self) -> Vec<u8> {
         let (slice1, slice2) = self.buffer.as_slices();
-        #[cfg(feature = "hash")]
+
         {
             self.hash.write(slice1);
             self.hash.write(slice2);
@@ -286,7 +313,7 @@ impl DecodeBuffer {
 
         if n1 != 0 {
             let (written1, res1) = write_bytes(&slice1[..n1]);
-            #[cfg(feature = "hash")]
+
             self.hash.write(&slice1[..written1]);
             drain_guard.amount += written1;
 
@@ -297,7 +324,7 @@ impl DecodeBuffer {
             // Partial writes SHOULD never happen without res1 being an error, but lets just protect against it anyways.
             if written1 == n1 && n2 != 0 {
                 let (written2, res2) = write_bytes(&slice2[..n2]);
-                #[cfg(feature = "hash")]
+
                 self.hash.write(&slice2[..written2]);
                 drain_guard.amount += written2;
 

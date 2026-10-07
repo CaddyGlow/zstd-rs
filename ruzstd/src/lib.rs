@@ -12,6 +12,7 @@
 //!
 #![doc = include_str!("../Readme.md")]
 #![no_std]
+#![forbid(unsafe_code)]
 #![deny(trivial_casts, trivial_numeric_casts, rust_2018_idioms)]
 
 #[cfg(feature = "std")]
@@ -33,6 +34,7 @@ macro_rules! vprintln {
 }
 
 mod bit_io;
+mod checksum;
 mod common;
 pub mod decoding;
 #[cfg(feature = "dict_builder")]

@@ -1,9 +1,9 @@
 //! Utilities and interfaces for encoding an entire frame. Allows reusing resources
 
+#[cfg(feature = "hash")]
+use crate::checksum::XxHash64;
 use alloc::vec::Vec;
 use core::convert::TryInto;
-#[cfg(feature = "hash")]
-use twox_hash::XxHash64;
 
 #[cfg(feature = "hash")]
 use core::hash::Hasher;

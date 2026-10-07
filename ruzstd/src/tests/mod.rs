@@ -751,5 +751,5 @@ pub mod fuzz_regressions;
 #[test]
 fn verbose_disabled() {
     use crate::VERBOSE;
-    assert_eq!(VERBOSE, false);
+    assert!(!core::hint::black_box(VERBOSE));
 }
